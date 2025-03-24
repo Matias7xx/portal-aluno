@@ -24,4 +24,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware(['auth', 'checkRole:servidor'])->group(function () {
+    Route::get('/servidor', function () {
+        return Inertia::render('Servidor/Home');
+    })->name('servidor.home');
+});
+
+Route::middleware(['auth', 'checkRole:aluno'])->group(function () {
+    Route::get('/aluno', function () {
+        return Inertia::render('Aluno/Home');
+    })->name('aluno.home');
+});
+
 require __DIR__.'/auth.php';
