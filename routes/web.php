@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Servidor\CursoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,25 +33,12 @@ Route::middleware(['auth', 'checkRole:servidor'])->group(function () {
         ]);
     })->name('servidor.home');
     
-    // Rota para o Calendário de Cursos dentro do Dashboard
-    Route::get('/servidor/calendario', function () {
-        return Inertia::render('Servidor/Home', [
-            'route' => 'calendario'
-        ]);
-    })->name('servidor.calendario');
-    
-    // Adicionar futuras rotas aqui usando o mesmo padrão
-    // Route::get('/servidor/historico', function () {
-    //     return Inertia::render('Servidor/Home', [
-    //         'route' => 'historico'
-    //     ]);
-    // })->name('servidor.historico');
-    
-    // Route::get('/servidor/sugeridos', function () {
-    //     return Inertia::render('Servidor/Home', [
-    //         'route' => 'sugeridos'
-    //     ]);
-    // })->name('servidor.sugeridos');
+    // Rotas para gerenciamento de cursos
+    Route::get('/servidor/calendario', [CursoController::class, 'calendario'])->name('servidor.calendario');
+    Route::get('/servidor/curso/{curso}', [CursoController::class, 'detalhes'])->name('servidor.curso.detalhes');
+    Route::get('/servidor/curso/{curso}/inscricao', [CursoController::class, 'formulario'])->name('servidor.curso.formulario');
+    Route::post('/servidor/curso/inscrever/{curso}', [CursoController::class, 'inscrever'])->name('servidor.curso.inscrever');
+    Route::get('/servidor/historico', [CursoController::class, 'historico'])->name('servidor.historico');
 });
 
 Route::middleware(['auth', 'checkRole:aluno'])->group(function () {
