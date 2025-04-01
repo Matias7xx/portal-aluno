@@ -47,7 +47,7 @@ const setupMenuItems = () => {
         submenu: [
           { name: 'Plano de Capacitação Anual', route: '' },
           { name: 'Calendário de Cursos', route: 'servidor.calendario' },
-          { name: 'Meus Cursos Realizados', route: 'servidor.historico' },
+          { name: 'Meus Cursos', route: 'servidor.historico' },
           { name: 'Cursos Sugeridos', route: '' },
           { name: 'Trilha de Conhecimento', route: '' }
         ]

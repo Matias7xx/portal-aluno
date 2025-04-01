@@ -26,14 +26,23 @@ const toggleTermos = () => {
   termoVisivel.value = !termoVisivel.value;
 };
 
-// Equipamentos baseados no curso (podem vir do backend ou serem padrão)
-const equipamentos = ref([
-  'Colete balístico',
-  'Óculos de proteção',
-  'Protetor auricular',
-  'Calçado apropriado',
-  'Vestimenta adequada conforme normas da instituição'
-]);
+// Enxoval necessário
+const equipamentos = computed(() => {
+  if (!props.curso.enxoval) return [];
+  
+  try {
+    // Se o enxoval já estiver em formato de array, use-o diretamente
+    if (Array.isArray(props.curso.enxoval)) {
+      return props.curso.enxoval;
+    }
+    
+    // Caso contrário, tente analisar como JSON
+    return JSON.parse(props.curso.enxoval);
+  } catch (e) {
+    console.error('Erro ao processar enxoval:', e);
+    return [];
+  }
+});
 
 // Estado do formulário
 const formData = ref({
@@ -42,7 +51,7 @@ const formData = ref({
   cursosAnteriores: '',
   expectativas: '',
   restricoesSaude: '',
-  equipamentosConfirmados: Array(equipamentos.value.length).fill(false),
+  equipamentosConfirmados: computed(() => Array(equipamentos.value.length).fill(false)),
   observacoes: ''
 });
 

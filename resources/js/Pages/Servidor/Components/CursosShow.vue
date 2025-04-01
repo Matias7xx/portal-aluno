@@ -11,6 +11,10 @@ const props = defineProps({
   }
 });
 
+const handleImageError = (event) => {
+  event.target.src = '/images/placeholder-news2.png';
+};
+
 // Estado local
 const loading = ref(false);
 
@@ -76,6 +80,42 @@ const copiarLink = () => {
     alert('Link copiado para a área de transferência');
   });
 };
+
+// Função para decodificar strings JSON em arrays
+const parseJsonField = (field) => {
+  if (!field) return [];
+  
+  if (Array.isArray(field)) return field;
+  
+  if (typeof field === 'string') {
+    try {
+      return JSON.parse(field);
+    } catch (e) {
+      console.error('Erro ao parsear JSON:', e);
+      return [];
+    }
+  }
+  
+  return [];
+};
+
+// Decodificar os arrays que vêm como JSON string do backend
+const preRequisitos = computed(() => {
+  return parseJsonField(props.curso.pre_requisitos);
+});
+
+const enxoval = computed(() => {
+  return parseJsonField(props.curso.enxoval);
+});
+
+// Verificar se os arrays decodificados têm conteúdo
+const temPreRequisitos = computed(() => {
+  return preRequisitos.value.length > 0;
+});
+
+const temEnxoval = computed(() => {
+  return enxoval.value.length > 0;
+});
 </script>
 
 <template>
@@ -84,11 +124,11 @@ const copiarLink = () => {
     <div class="relative h-72 bg-gray-900 overflow-hidden">
       <!-- Imagem de fundo com overlay escuro -->
       <div class="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
-      <img 
-        v-if="curso.imagem" 
+      <img  
         :src="curso.imagem" 
         alt="Imagem do curso" 
         class="absolute inset-0 h-full w-full object-cover"
+        @error="handleImageError"
       />
       
       <!-- Conteúdo sobreposto à imagem -->
@@ -177,8 +217,8 @@ const copiarLink = () => {
           <!-- Pré-requisitos do curso -->
           <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Pré-requisitos</h2>
-            <ul v-if="curso.pre_requisitos && curso.pre_requisitos.length > 0" class="list-disc pl-6 space-y-2 text-gray-600">
-              <li v-for="(requisito, index) in curso.pre_requisitos" :key="index">
+            <ul v-if="temPreRequisitos" class="list-disc pl-6 space-y-2 text-gray-600">
+              <li v-for="(requisito, index) in preRequisitos" :key="index">
                 {{ requisito }}
               </li>
             </ul>
@@ -188,8 +228,8 @@ const copiarLink = () => {
           <!-- Material necessário -->
           <div class="bg-white rounded-lg shadow-sm p-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Material necessário</h2>
-            <ul v-if="curso.enxoval && curso.enxoval.length > 0" class="list-disc pl-6 space-y-2 text-gray-600">
-              <li v-for="(item, index) in curso.enxoval" :key="index">
+            <ul v-if="temEnxoval" class="list-disc pl-6 space-y-2 text-gray-600">
+              <li v-for="(item, index) in enxoval" :key="index">
                 {{ item }}
               </li>
             </ul>

@@ -9,6 +9,10 @@ const mesesDisponiveis = ref([]);
 const mesSelecionado = ref('');
 const carregando = ref(false);
 
+const handleImageError = (event) => {
+  event.target.src = '/images/placeholder-news2.png';
+};
+
 // Receber os dados dos cursos das props
 onMounted(() => {
   // Verificar se os cursos foram passados via props
@@ -109,7 +113,7 @@ const formatarNomeMes = (mesAno) => {
         <!-- Imagem do curso com fallback para uma cor sólida -->
         <div class="h-40 bg-gray-300 relative">
           <div v-if="curso.imagem" class="absolute inset-0">
-            <img :src="curso.imagem" alt="Imagem do curso" class="w-full h-full object-cover">
+            <img :src="curso.imagem" alt="Imagem do curso" class="w-full h-full object-cover" @error="handleImageError">
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
             <div class="p-4 text-white">

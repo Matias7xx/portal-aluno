@@ -39,6 +39,9 @@ Route::middleware(['auth', 'checkRole:servidor'])->group(function () {
     Route::get('/servidor/curso/{curso}/inscricao', [CursoController::class, 'formulario'])->name('servidor.curso.formulario');
     Route::post('/servidor/curso/inscrever/{curso}', [CursoController::class, 'inscrever'])->name('servidor.curso.inscrever');
     Route::get('/servidor/historico', [CursoController::class, 'historico'])->name('servidor.historico');
+    
+    // Nova rota para certificados
+    Route::get('/servidor/curso/{curso}/certificado', [CursoController::class, 'certificado'])->name('servidor.curso.certificado');
 });
 
 Route::middleware(['auth', 'checkRole:aluno'])->group(function () {

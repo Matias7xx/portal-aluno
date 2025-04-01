@@ -190,10 +190,14 @@ class CursoController extends Controller
     {
         $user = Auth::user();
         
-        $cursosRealizados = $user->cursos()
-            ->wherePivot('status', 'aprovada')
+        // Buscar todas as matrículas do usuário com os cursos relacionados
+        $matriculas = Matricula::with('curso')
+            ->where('user_id', $user->id)
             ->get()
-            ->map(function ($curso) {
+            ->map(function ($matricula) {
+                $curso = $matricula->curso;
+                
+                // Formatar os dados para o frontend
                 return [
                     'id' => $curso->id,
                     'nome' => $curso->nome,
@@ -201,29 +205,64 @@ class CursoController extends Controller
                     'data_inicio' => $curso->data_inicio->format('Y-m-d'),
                     'data_fim' => $curso->data_fim->format('Y-m-d'),
                     'carga_horaria' => $curso->carga_horaria,
-                    'status_matricula' => $curso->pivot->status
-                ];
-            });
-            
-        $cursosEmAndamento = $user->cursos()
-            ->wherePivot('status', 'pendente')
-            ->get()
-            ->map(function ($curso) {
-                return [
-                    'id' => $curso->id,
-                    'nome' => $curso->nome,
-                    'descricao' => $curso->descricao,
-                    'data_inicio' => $curso->data_inicio->format('Y-m-d'),
-                    'data_fim' => $curso->data_fim->format('Y-m-d'),
-                    'carga_horaria' => $curso->carga_horaria,
-                    'status_matricula' => $curso->pivot->status
+                    'localizacao' => $curso->localizacao,
+                    'modalidade' => $curso->modalidade,
+                    'status' => $curso->status, // Status do curso
+                    // Dados da matrícula
+                    'status_matricula' => $matricula->status,
+                    'motivo_rejeicao' => $matricula->motivo_rejeicao,
+                    'data_inscricao' => $matricula->created_at->format('Y-m-d'),
+                    'matricula_id' => $matricula->id
                 ];
             });
         
+        // Todas as matrículas do usuário para o componente atualizado
+        // No componente é feita a filtragem das matrículas por status
+        $minhasMatriculas = $matriculas->values();
+        
+        // Cursos concluídos com matrícula aprovada
+        $cursosConcluidos = $matriculas->filter(function ($curso) {
+            return $curso['status'] === 'concluído' && $curso['status_matricula'] === 'aprovada';
+        })->values();
+        
+        // Matrículas que foram rejeitadas
+        $matriculasRejeitadas = $matriculas->filter(function ($curso) {
+            return $curso['status_matricula'] === 'rejeitada';
+        })->values();
+        
         return Inertia::render('Servidor/Home', [
             'route' => 'historico',
-            'cursosRealizados' => $cursosRealizados,
-            'cursosEmAndamento' => $cursosEmAndamento
+            'minhasMatriculas' => $minhasMatriculas,
+            'cursosConcluidos' => $cursosConcluidos,
+            'matriculasRejeitadas' => $matriculasRejeitadas
+        ]);
+    }
+    
+    /**
+     * Gera um certificado para um curso concluído
+     * (Funcionalidade a ser implementada)
+     */
+    public function certificado(Curso $curso)
+    {
+        // Verificar se o usuário tem permissão para emitir o certificado
+        $matricula = Matricula::where('curso_id', $curso->id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'aprovada')
+            ->first();
+            
+        if (!$matricula || $curso->status !== 'concluído') {
+            abort(403, 'Você não tem permissão para emitir este certificado ou o curso ainda não foi concluído');
+        }
+        
+        // Aqui será implementada a lógica para gerar o certificado
+        // Por exemplo, renderizar um PDF com os dados do curso e do aluno
+        
+        // Por enquanto, apenas retorna uma mensagem de sucesso
+        return Inertia::render('Servidor/Home', [
+            'route' => 'certificado',
+            'curso' => $curso,
+            'matricula' => $matricula,
+            'message' => 'Função de emissão de certificado será implementada em breve.'
         ]);
     }
 }
